@@ -7,19 +7,20 @@
 
 #include <iostream>
 #include <vector>
+#include "Mesh.h"
 using namespace std;
 
 float canvasSize[] = { 10.0f, 10.0f };
 int rasterSize[] = { 800, 600 };
 
-// structure for storing 3 2D vertices of a triangle
-int numOfVertices = 0;
-vector<float> v;
+vector<Mesh*> shapes;
+Mesh* currShape; 
+
 float color[3];
 
 float mousePos[2];
 
-int maxVertices = 1; 
+//int maxVertices = 1; 
 
 enum PointSize {
     Small = 11,
@@ -36,8 +37,10 @@ enum LineWidth {
 void init(void)
 {
     mousePos[0] = mousePos[1] = 0.0f;
-    color[0] = 1.0f;
-    color[1] = color[2] = 0.0f;
+    color[0] = color[1] = color[2] = 0.0f;
+
+    currShape = new Mesh(); 
+    shapes.push_back(currShape); 
 }
 
 void drawCursor()
@@ -59,33 +62,11 @@ void display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    if (numOfVertices > 0 && numOfVertices < maxVertices) {
-
-        glBegin(GL_LINE_STRIP);
-        for (int i = 0; i < numOfVertices; i++)
-            glVertex2fv(&v.front() + i * 2);
-        glVertex2fv(mousePos);
-        glEnd();
-    }
-    else if (numOfVertices == maxVertices) {
-        if (maxVertices > 2) {
-            glBegin(GL_POLYGON);
-        }
-        else if (maxVertices == 1) {
-            glBegin(GL_POINT); 
-        }
-        else if (maxVertices == 2) {
-            glBegin(GL_LINE);
-        }
-
-        for (int i = 0; i < numOfVertices; i++) {
-            glVertex2fv(&v.front() + i * 2);
-        }
-
-        glEnd();
+    for (int i = 0; i < shapes.size(); i++) {
+        shapes[i]->draw(mousePos); 
     }
 
-    drawCursor();
+    currShape->draw(mousePos); 
     glutSwapBuffers();
 }
 
@@ -105,22 +86,20 @@ void reshape(int w, int h)
 void mouse(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        if (numOfVertices >= maxVertices) {
-            numOfVertices = 0;
-            v.clear(); 
-            
-            if (maxVertices > 4) {
-                maxVertices = INT_MAX; 
-            }
-        }
-
         mousePos[0] = (float)x / rasterSize[0] * canvasSize[0];
         mousePos[1] = (float)(rasterSize[1] - y) / rasterSize[1] * canvasSize[1];
-        v.push_back(mousePos[0]);
-        v.push_back(mousePos[1]);
 
-        numOfVertices++;
-        glutPostRedisplay();
+        if (currShape->getMaxVertices() != -1) {
+            currShape->addVertex(mousePos[0], mousePos[1]);
+
+            if (currShape->getNumVertices() >= currShape->getMaxVertices()) {
+                currShape = new Mesh(currShape->getMaxVertices(), currShape->getColor(), currShape->getPointSize(), currShape->getLineWidth());
+
+                shapes.push_back(currShape);
+            }
+
+            glutPostRedisplay();
+        }
     }
 }
 
@@ -138,16 +117,8 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
         case 13: 
-            if (maxVertices == INT_MAX) {
-                maxVertices = numOfVertices;
-            }
-            else {
-                for (int i = v.size() / 2; i <= maxVertices; i++) { // This isn't right yet. This should probably push the last  
-                    v.push_back(mousePos[0]);                       // vertex to the vector rather than the current mouse position
-                    v.push_back(mousePos[1]);
-
-                    numOfVertices++;
-                }
+            if (currShape->getMaxVertices() == INT_MAX) {
+                currShape = new Mesh(currShape->getMaxVertices(), currShape->getColor(), currShape->getPointSize(), currShape->getLineWidth());
             }
 
             glutPostRedisplay();
@@ -162,12 +133,10 @@ void menu(int value)
 {
     switch (value) {
     case 0: // clear
-        numOfVertices = 0;
-        v.clear(); 
+        currShape = new Mesh(currShape->getMaxVertices(), currShape->getColor(), currShape->getPointSize(), currShape->getLineWidth());
 
-        if (maxVertices > 4) {
-            maxVertices = INT_MAX;
-        }
+        shapes.clear(); 
+        shapes.push_back(currShape);
 
         glutPostRedisplay();
         break;
@@ -175,55 +144,63 @@ void menu(int value)
         exit(0);
         break;
     case 2:                         // Set object to Point
-        maxVertices = 1; 
-        break;
+        if (currShape->getNumVertices() == 0) {
+            currShape->setMaxVertices(1);
+        }            
+        break;       
     case 3:                         // Set object to Line
-        maxVertices = 2; 
-        break;
-    case 4:                         // Set object to Triangle
-        maxVertices = 3; 
-        break;
-    case 5:                         // Set object to Quad
-        maxVertices = 4; 
-        break;
-    case 6:                         // Set object to Polygon
-        maxVertices = INT_MAX;
+        if (currShape->getNumVertices() == 0) {
+            currShape->setMaxVertices(2);
+        }            
+        break;       
+    case 4:                          // Set object to Triangle
+        if (currShape->getNumVertices() == 0) {
+            currShape->setMaxVertices(3);
+        }            
+        break;       
+    case 5:                          // Set object to Quad
+        if (currShape->getNumVertices() == 0) {
+            currShape->setMaxVertices(4);
+        }            
+        break;       
+    case 6:                          // Set object to Polygon
+        if (currShape->getNumVertices() == 0) {
+            currShape->setMaxVertices(INT_MAX);
+        }
         break;
     case 7:                         // Set color to Red
-        color[0] = 1.0f;
-        color[1] = 0.0f;
-        color[2] = 0.0f;
+        currShape->setColor(1.0f, 0.0f, 0.0f);
         glutPostRedisplay();
         break;
     case 8:                         // Set color to Green
-        color[0] = 0.0f;
-        color[1] = 1.0f;
-        color[2] = 0.0f;
+        currShape->setColor(0.0f, 1.0f, 0.0f);
         glutPostRedisplay();
         break;
     case 9:                         // Set color to Blue
-        color[0] = 0.0f;
-        color[1] = 0.0f;
-        color[2] = 1.0f;
+        currShape->setColor(0.0f, 0.0f, 1.0f);
         glutPostRedisplay();
         break;
     case 10:                        // Set color to Black
-        color[0] = 0.0f; 
-        color[1] = 0.0f; 
-        color[2] = 0.0f; 
+        currShape->setColor(0.0f, 0.0f, 0.0f);
         glutPostRedisplay(); 
         break; 
     case 11:                        // Set point size to Small
+        currShape->setPointSize(1.0f);
         break;                              
     case 12:                        // Set point size to Medium
-        break;                              
+        currShape->setPointSize(5.0f);
+        break;
     case 13:                        // Set point size to Large
+        currShape->setPointSize(10.0f);
         break;
     case 14:                        // Set line width to Thin
-        break;                             
+        currShape->setLineWidth(1.0f);
+        break;
     case 15:                        // Set line width to Average
-        break;                             
+        currShape->setLineWidth(2.5f);
+        break;
     case 16:                        // Set line width to Thick
+        currShape->setLineWidth(5.0f);
         break;
     default:
         break;
@@ -259,6 +236,7 @@ void createMenu()
     glutAddSubMenu("Objects", objectMenu); 
     glutAddSubMenu("Colors", colorMenu);
     glutAddSubMenu("Point Size", sizesMenu); 
+    glutAddSubMenu("LineWidth", widthsMenu);
     glutAddMenuEntry("Exit", 1);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
