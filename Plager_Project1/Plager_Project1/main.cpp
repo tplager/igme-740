@@ -92,7 +92,8 @@ void mouse(int button, int state, int x, int y)
         if (currShape->getMaxVertices() != -1) {
             currShape->addVertex(mousePos[0], mousePos[1]);
 
-            if (currShape->getNumVertices() >= currShape->getMaxVertices()) {
+            if (currShape->getNumVertices() >= currShape->getMaxVertices() && currShape->getMaxVertices() != 2) {
+                currShape->setFinished(true);
                 currShape = new Mesh(currShape->getMaxVertices(), currShape->getColor(), currShape->getPointSize(), currShape->getLineWidth());
 
                 shapes.push_back(currShape);
@@ -117,8 +118,11 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
         case 13: 
-            if (currShape->getMaxVertices() == INT_MAX) {
+            if (currShape->getMaxVertices() == INT_MAX || currShape->getMaxVertices() == 2) {
+                currShape->setFinished(true);
                 currShape = new Mesh(currShape->getMaxVertices(), currShape->getColor(), currShape->getPointSize(), currShape->getLineWidth());
+
+                shapes.push_back(currShape);
             }
 
             glutPostRedisplay();
@@ -185,7 +189,7 @@ void menu(int value)
         glutPostRedisplay(); 
         break; 
     case 11:                        // Set point size to Small
-        currShape->setPointSize(1.0f);
+        currShape->setPointSize(2.0f);
         break;                              
     case 12:                        // Set point size to Medium
         currShape->setPointSize(5.0f);

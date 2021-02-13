@@ -7,8 +7,9 @@ Mesh::Mesh()
 
     color = new float[3];
 
-    pointSize = 1.0f;
+    pointSize = 2.0f;
     lineWidth = 1.0f;
+    finished = false;
 }
 
 Mesh::Mesh(float mV, float* c, float pS, float lW)
@@ -23,6 +24,7 @@ Mesh::Mesh(float mV, float* c, float pS, float lW)
 
     pointSize = pS; 
     lineWidth = lW; 
+    finished = false;
 }
 
 Mesh::~Mesh()
@@ -82,12 +84,17 @@ void Mesh::setLineWidth(float lw)
     lineWidth = lw; 
 }
 
+void Mesh::setFinished(bool f)
+{
+    finished = f;
+}
+
 void Mesh::draw(const GLfloat* mousePos)
 {
     glColor3fv(color);
     glLineWidth(lineWidth);
 
-    if (numVertices > 0 && numVertices < maxVertices) {
+    if (numVertices > 0 && !finished) {
 
         glBegin(GL_LINE_STRIP);
         for (int i = 0; i < numVertices; i++)
@@ -95,15 +102,12 @@ void Mesh::draw(const GLfloat* mousePos)
         glVertex2fv(mousePos);
         glEnd();
     }
-    else if (numVertices == maxVertices) {
+    else if (finished) {
         if (maxVertices > 2) {
             glBegin(GL_POLYGON);
         }
-        else if (maxVertices == 1) {
-            glBegin(GL_POINTS);
-        }
         else if (maxVertices == 2) {
-            glBegin(GL_LINE);
+            glBegin(GL_LINE_STRIP);
         }
 
         for (int i = 0; i < numVertices; i++) {
