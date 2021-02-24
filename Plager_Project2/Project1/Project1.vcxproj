@@ -145,6 +145,14 @@
   <ItemGroup>
     <ClCompile Include="2DTransformTree.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Robot.cpp" />
+    <ClCompile Include="RobotPart.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Robot.h" />
+    <ClInclude Include="RobotPart.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

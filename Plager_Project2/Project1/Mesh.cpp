@@ -6,8 +6,38 @@ Mesh::Mesh()
 
     color = new float[3];
 
-    pointSize = 2.0f;
+    pointSize = 1.0f;
     lineWidth = 1.0f;
+}
+
+Mesh::Mesh(const Mesh& other)
+{
+    numVertices = other.numVertices; 
+
+    vertices = other.vertices;
+
+    color = new float[3];
+    color[0] = other.color[0]; 
+    color[1] = other.color[1];
+    color[2] = other.color[2];
+
+    pointSize = other.pointSize; 
+    lineWidth = other.lineWidth;
+}
+
+void Mesh::operator=(const Mesh& other)
+{
+    numVertices = other.numVertices;
+
+    vertices.clear(); 
+    vertices = other.vertices;
+
+    color[0] = other.color[0];
+    color[1] = other.color[1];
+    color[2] = other.color[2];
+
+    pointSize = other.pointSize;
+    lineWidth = other.lineWidth;
 }
 
 Mesh::Mesh(float* c, float pS, float lW)
@@ -25,7 +55,7 @@ Mesh::Mesh(float* c, float pS, float lW)
 
 Mesh::~Mesh()
 {
-    delete color;
+    delete[] color;
 }
 
 std::vector<float> Mesh::getVertices()
@@ -70,24 +100,18 @@ void Mesh::setLineWidth(float lw)
     lineWidth = lw; 
 }
 
-void Mesh::draw(const GLfloat* mousePos)
+void Mesh::draw()
 {
     glColor3fv(color);
     glLineWidth(lineWidth);
 
-    if (numVertices > 0) {
+    glBegin(GL_POLYGON);
 
-        glBegin(GL_LINE_STRIP);
-        for (int i = 0; i < numVertices; i++)
-            glVertex2fv(&vertices.front() + i * 2);
-        glVertex2fv(mousePos);
-        glEnd();
-    }
-
-    glPointSize(pointSize);
-    glBegin(GL_POINTS);
     for (int i = 0; i < numVertices; i++) {
         glVertex2fv(&vertices.front() + i * 2);
     }
+
+    glEnd();
+
     glEnd();
 }

@@ -6,14 +6,23 @@
 #endif
 
 #include <vector>
+#include <algorithm>
+
 #include "RobotPart.h"
 
 class Robot
 {		
 	private:
 		std::vector<RobotPart> bodyParts; 
+		int selectedIndex = 0; 
+		void initBodyParts(); 
+		void initBodyPartRelations(); 
 	public: 		
 		Robot();
-		void Draw(); 
+		void draw(); 
+		void selectDown();
+		void selectUp();
+		void selectRight();
+		void selectLeft();
 };
 

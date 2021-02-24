@@ -18,8 +18,9 @@ class Mesh
 		float lineWidth; 
 	public:
 		Mesh();
+		Mesh(const Mesh&);
+		void operator= (const Mesh& other);
 		Mesh(float*, float, float);
-
 		~Mesh(); 
 
 		std::vector<float> getVertices();
@@ -28,11 +29,10 @@ class Mesh
 		float getPointSize();
 		float getLineWidth();
 
-		void setMaxVertices(float);
 		void setColor(float, float, float);
 		void setPointSize(float);
 		void setLineWidth(float);
 
-		void virtual draw(const GLfloat*);
+		void virtual draw();
 };
 

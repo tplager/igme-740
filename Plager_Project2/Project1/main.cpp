@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <math.h>
+#include "Robot.h"
+
 using namespace std;
 
 #define MAX_NUM_CIRCLE 7
@@ -24,6 +26,8 @@ int buttonState;
 float colors[3 * MAX_NUM_CIRCLE];
 float translations[2 * MAX_NUM_CIRCLE];
 float rotations[MAX_NUM_CIRCLE];
+
+Robot robot; 
 
 float curMouse[2];
 float preMouse[2];
@@ -68,46 +72,47 @@ void display(void)
     // the following codes could be written in a for loop.
     // Here I expand them so that you can better trace the changes of cirlce's coordinate system.
 
-    int cid = -1; // the index of current circle
-    // circle 0
-    cid = 0;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //int cid = -1; // the index of current circle
+    //// circle 0
+    //cid = 0;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
-    // circle 1
-    cid = 1;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    glPushMatrix(); // push the circle 1's CS to the modelview stack
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //// circle 1
+    //cid = 1;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //glPushMatrix(); // push the circle 1's CS to the modelview stack
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
-    // circle 2
-    cid = 2;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //// circle 2
+    //cid = 2;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
-    // circle 3
-    cid = 3;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //// circle 3
+    //cid = 3;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
 
-    glPopMatrix(); // back to the CS of Circle 1
-    // circle 4
-    cid = 4;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //glPopMatrix(); // back to the CS of Circle 1
+    //// circle 4
+    //cid = 4;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
-    // circle 5
-    cid = 5;
-    glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
-    glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
-    drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
+    //// circle 5
+    //cid = 5;
+    //glTranslatef(translations[cid * 2 + 0], translations[cid * 2 + 1], 0.0f);
+    //glRotatef(rotations[cid], 0.0f, 0.0f, 1.0f);
+    //drawCircle(CIRCLE_RADIUM * (MAX_NUM_CIRCLE - cid) / MAX_NUM_CIRCLE, colors + cid * 3);
 
+    robot.draw(); 
 
     glutSwapBuffers();
 }
@@ -130,7 +135,12 @@ void keyboard(unsigned char key, int x, int y)
 {
     if (key == 27) // 'esc' key
         exit(0);
-
+    else if (key == 33) {
+        // Rotate Counter Clockwise
+    }
+    else if (key == 36) {
+        // Rotate Clockwise
+    }
     unsigned char asciiOffset = 49; // see an ascii table
     for (unsigned char i = '1'; i < '7'; i++) {
         if (key == i) {
@@ -143,18 +153,29 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
-void keyboardUp(unsigned char key, int x, int y)
+void specialKeyboard(int key, int x, int y) 
 {
-    unsigned char asciiOffset = 49; // see an ascii table
-    for (unsigned char i = '1'; i < '7'; i++) {
-        if (key == i) {
-            keyStates[i] = false;
-            colors[(i - asciiOffset) * 3 + 0] = 0.0f;
-            colors[(i - asciiOffset) * 3 + 1] = 0.0f;
-            colors[(i - asciiOffset) * 3 + 2] = 0.0f;
-        }
+    switch (key)
+    {
+        case GLUT_KEY_UP:
+            cout << "Up" << endl;
+            robot.selectUp();
+            break;
+        case GLUT_KEY_DOWN:
+            cout << "Down" << endl;
+            robot.selectDown();
+            break;
+        case GLUT_KEY_LEFT:
+            cout << "Left" << endl;
+            robot.selectLeft();
+            break;
+        case GLUT_KEY_RIGHT:
+            cout << "Right" << endl;
+            robot.selectRight();
+            break;
     }
-    glutPostRedisplay();
+
+    glutPostRedisplay(); 
 }
 
 void mouse(int button, int state, int x, int y)
@@ -212,7 +233,7 @@ int main(int argc, char* argv[])
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
-    glutKeyboardUpFunc(keyboardUp);
+    glutSpecialFunc(specialKeyboard); 
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutMainLoop();
