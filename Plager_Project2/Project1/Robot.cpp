@@ -18,39 +18,40 @@ enum BodyPartIndex {
 	LeftLeg, 
 	LeftFoot
 };
+
 void Robot::initBodyParts()
 {
-	bodyParts.push_back(RobotPart(BodyPartIndex::LowerBody, 2.2f, 1.6f, 0.0f, 0.0f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LowerBody, 2.2f, 1.6f, 0.0f, 0.8f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::UpperBody, 3.0f, 1.7f, 0.0f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::UpperBody, 3.0f, 1.7f, 0.0f, 0.85f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::Neck, 0.6f, 1.0f, 0.0f, 3.0f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::Neck, 0.6f, 1.0f, 0.0f, 0.5f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::Head, 1.8f, 1.8f, 0.0f, 4.4f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::Head, 1.8f, 1.8f, 0.0f, 0.9f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightArm, 1.5f, 0.7f, 2.25f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightArm, 1.5f, 0.7f, 0.75f, 0.0f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightForearm, 1.5f, 0.7f, 3.75f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightForearm, 1.5f, 0.7f, 0.75f, 0.0));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightHand, 1.1f, 1.1f, 5.05f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightHand, 1.1f, 1.1f, 0.55f, 0.0));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftArm, 1.5f, 0.7f, -2.25f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftArm, 1.5f, 0.7f, -0.75f, 0.0f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftForearm, 1.5f, 0.7f, -3.75f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftForearm, 1.5f, 0.7f, -0.75f, 0.0f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftHand, 1.1f, 1.1f, -5.05f, 1.65f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftHand, 1.1f, 1.1f, -0.55f, 0.0f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightThigh, 0.7f, 1.8f, 0.75f, -1.7f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightThigh, 0.7f, 1.8f, 0.0f, -0.9f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightLeg, 0.7f, 1.8f, 0.75f, -3.5f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightLeg, 0.7f, 1.8f, 0.0f, -0.9f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::RightFoot, 1.6f, 0.8f, 1.2f, -4.8f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::RightFoot, 1.6f, 0.8f, 0.4f, -0.4f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftThigh, 0.7f, 1.8f, -0.75f, -1.7f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftThigh, 0.7f, 1.8f, 0.0f, -0.9f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftLeg, 0.7f, 1.8f, -0.75f, -3.5f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftLeg, 0.7f, 1.8f, 0.0f, -0.9f));
 
-	bodyParts.push_back(RobotPart(BodyPartIndex::LeftFoot, 1.6f, 0.8f, -1.2f, -4.8f));
+	bodyParts.push_back(RobotPart(BodyPartIndex::LeftFoot, 1.6f, 0.8f, -0.4f, -0.4f));
 }
 
 void Robot::initBodyPartRelations()
@@ -82,16 +83,49 @@ void Robot::initBodyPartRelations()
 	bodyParts[BodyPartIndex::RightLeg].addChild(&bodyParts[BodyPartIndex::RightFoot]);
 }
 
+void Robot::initJoints()
+{
+	bodyParts[BodyPartIndex::LowerBody].setJoint(0.0, 0.0f);
+
+	bodyParts[BodyPartIndex::UpperBody].setJoint(0.0f, 1.6f);
+
+	bodyParts[BodyPartIndex::Neck].setJoint(0.0f, 1.7f);
+
+	bodyParts[BodyPartIndex::Head].setJoint(0.0f, 1.0f);
+
+	bodyParts[BodyPartIndex::LeftArm].setJoint(-1.5f, 0.8f);
+
+	bodyParts[BodyPartIndex::LeftForearm].setJoint(-1.5f, 0.0f);
+
+	bodyParts[BodyPartIndex::LeftHand].setJoint(-1.5f, 0.0f);
+
+	bodyParts[BodyPartIndex::RightArm].setJoint(1.5f, 0.8f);
+
+	bodyParts[BodyPartIndex::RightForearm].setJoint(1.5f, 0.0f);
+
+	bodyParts[BodyPartIndex::RightHand].setJoint(1.5f, 0.0f);
+
+	bodyParts[BodyPartIndex::LeftThigh].setJoint(-0.75, 0.0f);
+
+	bodyParts[BodyPartIndex::LeftLeg].setJoint(0.0, -1.8f);
+
+	bodyParts[BodyPartIndex::LeftFoot].setJoint(0.05, -1.8f);
+
+	bodyParts[BodyPartIndex::RightThigh].setJoint(0.75f, 0.0f);
+
+	bodyParts[BodyPartIndex::RightLeg].setJoint(0.0f, -1.8f);
+
+	bodyParts[BodyPartIndex::RightFoot].setJoint(0.05f, -1.8f);
+}
+
 Robot::Robot()
 {
 	// Set Up Body Parts
 	initBodyParts(); 
 	initBodyPartRelations(); 
+	initJoints();
 
 	bodyParts[selectedIndex].select(); 
-
-	//testing
-	//bodyParts[0].setRotation(45.0f); 
 }
 
 void Robot::draw()
@@ -139,4 +173,14 @@ void Robot::selectLeft()
 		return;
 	else
 		selectedIndex = temp;
+}
+
+void Robot::rotateCounterClockwise()
+{
+	bodyParts[selectedIndex].rotateCounterClockwise(); 
+}
+
+void Robot::rotateClockwise()
+{
+	bodyParts[selectedIndex].rotateClockwise(); 
 }

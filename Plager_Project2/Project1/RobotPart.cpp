@@ -6,21 +6,30 @@ RobotPart::RobotPart(int id, float width, float height, float centerX, float cen
 
 	vertices.push_back(centerX - width/2);
 	vertices.push_back(centerY + height/2);
-
 	vertices.push_back(centerX + width / 2);
 	vertices.push_back(centerY + height / 2);
-
 	vertices.push_back(centerX + width / 2);
 	vertices.push_back(centerY - height / 2);
-
 	vertices.push_back(centerX - width / 2);
 	vertices.push_back(centerY - height / 2);
+
+	trueVertices.push_back(centerX - width / 2);
+	trueVertices.push_back(centerY + height / 2);
+	trueVertices.push_back(centerX + width / 2);
+	trueVertices.push_back(centerY + height / 2);
+	trueVertices.push_back(centerX + width / 2);
+	trueVertices.push_back(centerY - height / 2);
+	trueVertices.push_back(centerX - width / 2);
+	trueVertices.push_back(centerY - height / 2);
 
 	numVertices = 4; 
 
 	lineWidth = 2.0f; 
 
 	rotation = 0.0f; 
+
+	joint[0] = 0.0f; 
+	joint[1] = 0.0f; 
 }
 
 float RobotPart::getRotation()
@@ -38,6 +47,12 @@ void RobotPart::setRotation(float value)
 	rotation = value;
 }
 
+void RobotPart::setJoint(float x, float y)
+{
+	joint[0] = x;
+	joint[1] = y;
+}
+
 void RobotPart::setParent(RobotPart* value)
 {
 	parent = value; 
@@ -46,6 +61,8 @@ void RobotPart::setParent(RobotPart* value)
 void RobotPart::addChild(RobotPart* newChild)
 {
 	children.push_back(newChild); 
+
+	newChild->parent = this;
 }
 
 void RobotPart::select()
@@ -54,7 +71,7 @@ void RobotPart::select()
 	color[1] = 0.0f; 
 	color[2] = 0.0f; 
 
-	lineWidth = 8.0f;
+	lineWidth = 4.0f;
 }
 
 void RobotPart::deselect() 
@@ -70,9 +87,13 @@ void RobotPart::draw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
 
-	glRotatef(rotation, 0.0f, 0.0f, 1.0f); 
+	glPushMatrix(); 
+
+	doParentTransformations(); 
 
 	Mesh::draw(); 
+
+	glPopMatrix();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
 }
@@ -82,7 +103,6 @@ int RobotPart::selectDown()
 	if (children.size() == 0)
 		return -1; 
 
-	children[selectedChild]->setParent(this);
 	children[selectedChild]->select(); 
 	deselect(); 
 
@@ -130,4 +150,24 @@ int RobotPart::selectLeft()
 	deselect();
 
 	return parent->selectDown();
+}
+
+void RobotPart::rotateCounterClockwise()
+{
+	rotation += 2; 
+}
+
+void RobotPart::rotateClockwise()
+{
+	rotation -= 2;
+}
+
+void RobotPart::doParentTransformations()
+{
+	if (parent != nullptr) {
+		parent->doParentTransformations(); 
+	}
+
+	glTranslatef(joint[0], joint[1], 0.0f); 
+	glRotatef(rotation, 0.0f, 0.0f, 1.0f); 
 }

@@ -17,12 +17,18 @@ class Robot
 		int selectedIndex = 0; 
 		void initBodyParts(); 
 		void initBodyPartRelations(); 
+		void initJoints(); 
 	public: 		
 		Robot();
+
 		void draw(); 
+
 		void selectDown();
 		void selectUp();
 		void selectRight();
 		void selectLeft();
+
+		void rotateCounterClockwise(); 
+		void rotateClockwise(); 
 };
 
