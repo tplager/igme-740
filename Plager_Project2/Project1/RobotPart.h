@@ -17,6 +17,8 @@ class RobotPart : public Mesh
 		std::vector<RobotPart*> children; 
 		RobotPart* parent = nullptr;
 		int selectedChild = 0; 
+
+		void doParentTransformations();
 	public: 
 		RobotPart(int id, float width, float height, float centerX, float centerY);
 
@@ -39,7 +41,5 @@ class RobotPart : public Mesh
 
 		void rotateCounterClockwise(); 
 		void rotateClockwise();
-
-		void doParentTransformations(); 
 };
 

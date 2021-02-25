@@ -19,6 +19,9 @@ enum BodyPartIndex {
 	LeftFoot
 };
 
+/// <summary>
+/// Initializes the positions of the body parts of the robot
+/// </summary>
 void Robot::initBodyParts()
 {
 	bodyParts.push_back(RobotPart(BodyPartIndex::LowerBody, 2.2f, 1.6f, 0.0f, 0.8f));
@@ -54,6 +57,9 @@ void Robot::initBodyParts()
 	bodyParts.push_back(RobotPart(BodyPartIndex::LeftFoot, 1.6f, 0.8f, -0.4f, -0.4f));
 }
 
+/// <summary>
+/// Initializes the relationships between the robot's body parts
+/// </summary>
 void Robot::initBodyPartRelations()
 {
 	bodyParts[BodyPartIndex::LowerBody].addChild(&bodyParts[BodyPartIndex::UpperBody]); 
@@ -83,6 +89,9 @@ void Robot::initBodyPartRelations()
 	bodyParts[BodyPartIndex::RightLeg].addChild(&bodyParts[BodyPartIndex::RightFoot]);
 }
 
+/// <summary>
+/// Initializes the joints of each robot body part
+/// </summary>
 void Robot::initJoints()
 {
 	bodyParts[BodyPartIndex::LowerBody].setJoint(0.0, 0.0f);
@@ -128,6 +137,9 @@ Robot::Robot()
 	bodyParts[selectedIndex].select(); 
 }
 
+/// <summary>
+/// Draws all the robot's body parts
+/// </summary>
 void Robot::draw()
 {
 	for (int i = 0; i < bodyParts.size(); i++) {
@@ -135,6 +147,9 @@ void Robot::draw()
 	}
 }
 
+/// <summary>
+/// Selects a child of the currently selected body part if possible
+/// </summary>
 void Robot::selectDown() 
 {
 	int temp = bodyParts[selectedIndex].selectDown(); 
@@ -145,6 +160,9 @@ void Robot::selectDown()
 		selectedIndex = temp;
 }
 
+/// <summary>
+/// Selects the parent of the currently selected body part if possible
+/// </summary>
 void Robot::selectUp()
 {
 	int temp = bodyParts[selectedIndex].selectUp();
@@ -155,6 +173,9 @@ void Robot::selectUp()
 		selectedIndex = temp;
 }
 
+/// <summary>
+/// Selects the next child of the currently selected body part's parent's children vector
+/// </summary>
 void Robot::selectRight()
 {
 	int temp = bodyParts[selectedIndex].selectRight();
@@ -165,6 +186,9 @@ void Robot::selectRight()
 		selectedIndex = temp;
 }
 
+/// <summary>
+/// Selects the previous child of the currently selected body part's parent's children vector
+/// </summary>
 void Robot::selectLeft()
 {
 	int temp = bodyParts[selectedIndex].selectLeft();
@@ -175,11 +199,17 @@ void Robot::selectLeft()
 		selectedIndex = temp;
 }
 
+/// <summary>
+/// Rotates the currently selected body part counter clockwise
+/// </summary>
 void Robot::rotateCounterClockwise()
 {
 	bodyParts[selectedIndex].rotateCounterClockwise(); 
 }
 
+/// <summary>
+/// Rotates the currently selected body part clockwise
+/// </summary>
 void Robot::rotateClockwise()
 {
 	bodyParts[selectedIndex].rotateClockwise(); 
