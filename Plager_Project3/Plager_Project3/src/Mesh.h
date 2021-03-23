@@ -56,7 +56,7 @@ public:
     */
     void create (const char* filename, const  char* v_shader_file, const char* f_shader_file);
 
-    void draw(mat4 viewMat, mat4 projMat, vec3 light1Pos, vec3 light2Pos, float time);
+    void draw(mat4 viewMat, mat4 projMat, vec3 light1Pos, vec3 light2Pos, vec3 eyePos, float time);
 
 	vec3 getPos(); 
 

@@ -174,7 +174,7 @@ void Mesh::create(const char* filename, const char* v_shader_file, const char* f
 	prepareVBOandShaders(v_shader_file, f_shader_file);
 }
 
-void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 light1Pos, vec3 light2Pos, float time) {
+void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 light1Pos, vec3 light2Pos, vec3 eyePos, float time) {
 
 	glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -200,6 +200,7 @@ void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 light1Pos, vec3 light2Pos, floa
 	shaderProg.setMatrix4fv("projMat", 1, value_ptr(projMat));
 	shaderProg.setFloat3V("light1Pos", 1, value_ptr(light1Pos));
 	shaderProg.setFloat3V("light2Pos", 1, value_ptr(light2Pos));		// Need to figure out how to have 2 light sources
+	shaderProg.setFloat3V("eyePos", 1, value_ptr(eyePos));
 	shaderProg.setFloat("time", time);
 	shaderProg.setFloat("offset", normal_offset);
 

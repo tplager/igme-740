@@ -1,11 +1,10 @@
 #version 430
-in vec3 color;
 in vec3 normal;
 in vec3 light1Dir; 
 in vec3 light2Dir; 
 in vec3 viewDir; 
 
-in vec3 test; 
+in vec4 test; 
 
 out vec4 frag_color;
 
@@ -44,14 +43,13 @@ void main() {
   vec3 total_color = vec3(0.0, 0.0, 0.0); 
 
   for (int i = 0; i < 2; i++) {
-    //vec3 reflected = 2 * normal * (dot(normal, lights[i].direction)) - lights[i].direction; 
-
     float diffuse_intensity = max(dot(normal, lights[i].direction), 0.0);
     float specular_intensity = 0.0; 
     
     if (diffuse_intensity > 0) {
-      vec3 reflected = reflect(-lights[i].direction, normal); 
-      vec3 viewDir = normalize(-test);
+	  vec3 reflected = 2 * normal * (dot(normal, lights[i].direction)) - lights[i].direction; 
+      //vec3 reflected = reflect(-lights[i].direction, normal); 
+      //vec3 viewDir = normalize(-test.xyz);
       float specAngle = max(dot(reflected, viewDir), 0.0);
       specular_intensity = pow(specAngle, lights[i].attenuation_coeff);
     }

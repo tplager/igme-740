@@ -136,8 +136,8 @@ void display()
 	g_lightSpheres[0].draw();
 	g_lightSpheres[1].draw();
 
-	g_teapots[0].draw(g_cam.viewMat, g_cam.projMat, g_lightSpheres[0].getPos(), g_lightSpheres[1].getPos(), g_time);;
-	g_teapots[1].draw(g_cam.viewMat, g_cam.projMat, g_lightSpheres[0].getPos(), g_lightSpheres[1].getPos(), g_time);;
+	g_teapots[0].draw(g_cam.viewMat, g_cam.projMat, g_lightSpheres[0].getPos(), g_lightSpheres[1].getPos(), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z), g_time);;
+	g_teapots[1].draw(g_cam.viewMat, g_cam.projMat, g_lightSpheres[0].getPos(), g_lightSpheres[1].getPos(), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z), g_time);;
 
     glutSwapBuffers();
 }
