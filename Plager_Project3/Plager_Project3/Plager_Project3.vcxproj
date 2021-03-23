@@ -19,10 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\basic.frag" />
-    <None Include="Shaders\basic.vert" />
-    <None Include="Shaders\displacement.frag" />
-    <None Include="Shaders\displacement.vert" />
     <None Include="Shaders\perFrag_lambert.frag" />
     <None Include="Shaders\perFrag_lambert.vert" />
     <None Include="Shaders\perFrag_phong.frag" />
@@ -31,8 +27,6 @@
     <None Include="Shaders\perVert_lambert.vert" />
     <None Include="Shaders\perVert_phong.frag" />
     <None Include="Shaders\perVert_phong.vert" />
-    <None Include="Shaders\toon_shading.frag" />
-    <None Include="Shaders\toon_shading.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />

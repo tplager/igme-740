@@ -5,6 +5,8 @@ in vec3 light1Dir;
 in vec3 light2Dir; 
 in vec3 viewDir; 
 
+in vec3 test; 
+
 out vec4 frag_color;
 
 struct light {
@@ -42,13 +44,17 @@ void main() {
   vec3 total_color = vec3(0.0, 0.0, 0.0); 
 
   for (int i = 0; i < 2; i++) {
-    vec3 reflected = 2 * normal * (dot(normal, lights[i].direction)) - lights[i].direction; 
+    //vec3 reflected = 2 * normal * (dot(normal, lights[i].direction)) - lights[i].direction; 
 
     float diffuse_intensity = max(dot(normal, lights[i].direction), 0.0);
-    float specular_intensity = pow(max(dot(reflected, viewDir), 0.0), lights[i].attenuation_coeff);
-
-    vec3 ambient_color = vec3(0.0, 0.15f, 0.0); 
-    float attenuation_coeff = 20; 
+    float specular_intensity = 0.0; 
+    
+    if (diffuse_intensity > 0) {
+      vec3 reflected = reflect(-lights[i].direction, normal); 
+      vec3 viewDir = normalize(-test);
+      float specAngle = max(dot(reflected, viewDir), 0.0);
+      specular_intensity = pow(specAngle, lights[i].attenuation_coeff);
+    }
 
     vec3 color_intensity = lights[i].ambient_color + (diffuse_intensity * lights[i].diffuse_color) + (specular_intensity * lights[i].specular_color);
 

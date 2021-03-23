@@ -18,18 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\basic.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shaders\basic.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shaders\displacement.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shaders\displacement.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
     <None Include="Shaders\perFrag_lambert.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
@@ -40,12 +28,6 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="Shaders\perVert_lambert.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shaders\toon_shading.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="Shaders\toon_shading.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="Shaders\perFrag_phong.frag">
