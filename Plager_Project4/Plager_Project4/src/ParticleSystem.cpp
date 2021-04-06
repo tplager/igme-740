@@ -50,14 +50,18 @@ float ParticleSystem::randomf(float min, float max)
 	return n * range + min;
 }
 
-void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 max_point,
+void ParticleSystem::create(unsigned int res_width, unsigned int res_height, vec3 min_point, vec3 max_point,
 	const char* compute_shader_file, const char* vertex_shader_file, const char* fragment_shader_file)
 {
-	if (num_of_particles <= 0) {
+	if (res_width <= 0 || res_height <= 0) {
 		cout << "The particle system wasn't created!" << endl;
 		return;
 	}
-	num = num_of_particles;
+	num = (res_width + 1) * (res_height + 1);
+
+	width = res_width; 
+	height = res_height; 
+
 	size_min_point = min_point;
 	size_max_point = max_point;
 
@@ -96,12 +100,17 @@ void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 
 
 	if (pos_array != NULL)
 	{
-		for (unsigned int i = 0; i < num; i++)
+		int i = 0; 
+		for (unsigned int x = 0; x < width + 1; x++)
 		{
-			pos_array[i].x = randomf(size_min_point.x, size_max_point.x);
-			pos_array[i].y = randomf(size_min_point.y, size_max_point.y);
-			pos_array[i].z = randomf(size_min_point.z, size_max_point.z);
-			pos_array[i].w = 1.0f;
+			for (unsigned int y = 0; y < height + 1; y++) {
+				pos_array[i].x = (((size_max_point.x - size_min_point.x) / width) * x) + size_min_point.x;
+				pos_array[i].y = (((size_max_point.y - size_min_point.y) / height) * y) + size_min_point.y;
+				pos_array[i].z = -5.0f;
+				pos_array[i].w = 1.0f;
+
+				i++;
+			}
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -154,7 +163,6 @@ void ParticleSystem::update(float delta_time)
 {
 	// invoke the compute shader to update the status of particles 
 	glUseProgram(cShaderProg.id);
-	cShaderProg.setFloat("deltaT", delta_time);
 	cShaderProg.setFloat3V("minPos", 1, glm::value_ptr(size_min_point));
 	cShaderProg.setFloat3V("maxPos", 1, glm::value_ptr(size_max_point));
 	glDispatchCompute((num+128-1)/128, 1, 1); // one-dimentional GPU threading config, 128 threads per froup 

@@ -45,7 +45,7 @@ char c_shader_file[] = ".\\shaders\\c_shader.comp";
 
 void initialization()
 {
-	parSys.create(20, vec3(-10.0f, 0, -5.0f), vec3(10.0f, 10.0f, -5.0f),
+	parSys.create(g_resWidth, g_resHeight, vec3(-10.0f, 0, -5.0f), vec3(10.0f, 10.0f, -5.0f),
 		c_shader_file, v_shader_file, f_shader_file);
 
 	g_cam.set(38.0f, 13.0f, 4.0f, 0.0f, 0.0f, 0.0f, g_winWidth, g_winHeight, 45.0f, 0.01f, 10000.0f);
@@ -73,8 +73,6 @@ void idle()
 {
 	// add any stuff to update at runtime ....
 	curTime = glutGet(GLUT_ELAPSED_TIME);
-	float deltaT = (float)(curTime - preTime) / 1000.0f; // in seconds
-	parSys.update(deltaT);
 
 	g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
 
@@ -91,7 +89,7 @@ void display()
 	glUseProgram(0);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
-	parSys.draw(15.0f, g_cam.viewMat, g_cam.projMat);
+	parSys.draw(1.0f, g_cam.viewMat, g_cam.projMat);
 
 	g_cam.drawGrid();
 	g_cam.drawCoordinateOnScreen(g_winWidth, g_winHeight);
@@ -115,8 +113,8 @@ void display()
 
 	glPopMatrix();
 
-	glUseProgram(0);
 	glMatrixMode(GL_MODELVIEW);
+	glUseProgram(0);
 	glColor3f(1.0f, 0, 0);
 	glPushMatrix();
 	glTranslatef(g_rayOrigin.x, g_rayOrigin.y, g_rayOrigin.z);
@@ -183,6 +181,8 @@ void keyboard(unsigned char key, int x, int y)
 			g_resHeight *= 2;
 		}
 
+		parSys.create(g_resWidth, g_resHeight, vec3(-10.0f, 0, -5.0f), vec3(10.0f, 10.0f, -5.0f),
+			c_shader_file, v_shader_file, f_shader_file);
 		// Particles need to be regenereated and remapped to SSBO's 
 		break; 
 	case 45: 
@@ -193,6 +193,8 @@ void keyboard(unsigned char key, int x, int y)
 			g_resHeight /= 2;
 		}
 
+		parSys.create(g_resWidth, g_resHeight, vec3(-10.0f, 0, -5.0f), vec3(10.0f, 10.0f, -5.0f),
+			c_shader_file, v_shader_file, f_shader_file);
 		// Particles need to be regenereated and remapped to SSBO's 
 		break;
 	case 'w': 
