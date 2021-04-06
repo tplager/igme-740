@@ -116,6 +116,7 @@ void display()
 	glPopMatrix();
 
 	glUseProgram(0);
+	glMatrixMode(GL_MODELVIEW);
 	glColor3f(1.0f, 0, 0);
 	glPushMatrix();
 	glTranslatef(g_rayOrigin.x, g_rayOrigin.y, g_rayOrigin.z);
