@@ -132,7 +132,7 @@ void display()
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glPushMatrix(); 
 	glTranslatef(g_wireSpherePos.x, g_wireSpherePos.y, g_wireSpherePos.z);
-	glutWireSphere(2.0f, 16, 16); 
+	glutWireSphere(2.0f, 32, 32); 
 	glPopMatrix(); 
 
 	glColor3f(1.0f, 1.0f, 1.0f);
