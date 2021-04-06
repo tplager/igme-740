@@ -163,8 +163,6 @@ void ParticleSystem::update(vec3 rayOrigin, vec3 spherePos, float sphereRadius)
 {
 	// invoke the compute shader to update the status of particles 
 	glUseProgram(cShaderProg.id);
-	cShaderProg.setFloat3V("minPos", 1, glm::value_ptr(size_min_point));
-	cShaderProg.setFloat3V("maxPos", 1, glm::value_ptr(size_max_point));
 	cShaderProg.setFloat3V("rayOriginPos", 1, glm::value_ptr(rayOrigin));
 	cShaderProg.setFloat3V("spherePos", 1, glm::value_ptr(spherePos));
 	cShaderProg.setFloat("sphereRadius", sphereRadius);

@@ -1,7 +1,5 @@
 #version 430 compatibility
 
-uniform vec3 minPos;
-uniform vec3 maxPos; 
 uniform vec3 rayOriginPos; 
 uniform vec3 spherePos; 
 uniform float sphereRadius; 
@@ -25,6 +23,11 @@ void main()
 
 	vec3 rayDirection = normalize(Positions[g_id].xyz - rayOriginPos);
 	
-	float result = ((rayDirection * (rayOriginPos - spherePos)) * (rayDirection * (rayOriginPos - spherePos))) - (pow(length(rayOriginPos - spherePos), 2) - pow(sphereRadius, 2));
+	float result = pow(dot(rayDirection, (rayOriginPos - spherePos)), 2) - (pow(length(rayOriginPos - spherePos), 2) - pow(sphereRadius, 2));
+
+	if (result >= 0)
+		Colors[g_id].rgb = vec3(0.0f, 0.8f, 0.9f);
+	else
+		Colors[g_id].rgb = vec3(0.0f, 0.0f, 0.5f);
 }
 
