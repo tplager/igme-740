@@ -159,12 +159,15 @@ void ParticleSystem::create(unsigned int res_width, unsigned int res_height, vec
 	glEnableVertexAttribArray(1);
 }
 
-void ParticleSystem::update(float delta_time)
+void ParticleSystem::update(vec3 rayOrigin, vec3 spherePos, float sphereRadius)
 {
 	// invoke the compute shader to update the status of particles 
 	glUseProgram(cShaderProg.id);
 	cShaderProg.setFloat3V("minPos", 1, glm::value_ptr(size_min_point));
 	cShaderProg.setFloat3V("maxPos", 1, glm::value_ptr(size_max_point));
+	cShaderProg.setFloat3V("rayOriginPos", 1, glm::value_ptr(rayOrigin));
+	cShaderProg.setFloat3V("spherePos", 1, glm::value_ptr(spherePos));
+	cShaderProg.setFloat("sphereRadius", sphereRadius);
 	glDispatchCompute((num+128-1)/128, 1, 1); // one-dimentional GPU threading config, 128 threads per froup 
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }

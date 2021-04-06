@@ -2,6 +2,9 @@
 
 uniform vec3 minPos;
 uniform vec3 maxPos; 
+uniform vec3 rayOriginPos; 
+uniform vec3 spherePos; 
+uniform float sphereRadius; 
 
 layout (std430, binding = 4) buffer Pos
 {
@@ -18,11 +21,10 @@ layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 
 void main()
 {
-	const vec3 G = vec3 (0.0f, -9.8f, 0.0f);
 	uint g_id = gl_GlobalInvocationID.x;
 
-	vec3 pos = Positions[g_id].xyz;
-
-	Positions[g_id].xyz = pos;
+	vec3 rayDirection = normalize(Positions[g_id].xyz - rayOriginPos);
+	
+	float result = ((rayDirection * (rayOriginPos - spherePos)) * (rayDirection * (rayOriginPos - spherePos))) - (pow(length(rayOriginPos - spherePos), 2) - pow(sphereRadius, 2));
 }
 

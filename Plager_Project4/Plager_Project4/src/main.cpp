@@ -73,6 +73,7 @@ void idle()
 {
 	// add any stuff to update at runtime ....
 	curTime = glutGet(GLUT_ELAPSED_TIME);
+	parSys.update(g_rayOrigin, g_wireSpherePos, 2.0f);
 
 	g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
 
