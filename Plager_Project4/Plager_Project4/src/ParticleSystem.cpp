@@ -21,12 +21,10 @@ ParticleSystem::ParticleSystem()
 	size_max_point = vec3(0);
 
 	pos_array = NULL;
-	dir_array = NULL;
-	speed_array = NULL;
 	color_array = NULL;
 	
 	vao = 0;
-	pos_ssbo = dir_ssbo = speed_ssbo = color_ssbo = 0; 
+	pos_ssbo = color_ssbo = 0; 
 
 	cShaderProg = ShaderProgram();
 	vfShaderProg = ShaderProgram();
@@ -108,41 +106,6 @@ void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
-	// map and create the direction array
-	glGenBuffers(1, &dir_ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dir_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, num * sizeof(vec4), NULL, GL_STATIC_DRAW); // there isn't data yet, just init memory, data will sent at run-time. 
-	dir_array = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, num * sizeof(vec4), bufMask);
-
-	if (dir_array != NULL)
-	{
-		for (unsigned int i = 0; i < num; i++)
-		{
-			vec4 v;
-			v.x = randomf();
-			v.y = randomf();
-			v.z = randomf();
-			v.w = 0.0f;
-			dir_array[i] = normalize(v); // make sure having a normalized directional vector, so that its magnitude = 1
-		}
-	}
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-	// map and create the speed array
-	glGenBuffers(1, &speed_ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, speed_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, num * sizeof(float), NULL, GL_STATIC_DRAW);
-	speed_array = (float*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, num * sizeof(float), bufMask);
-
-	if (speed_array != NULL)
-	{
-		for (unsigned int i = 0; i < num; i++)
-		{
-			speed_array[i] = randomf(5.0f, 10.0f);
-		}
-	}
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
 	// map and create the color array
 	glGenBuffers(1, &color_ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, color_ssbo);
@@ -153,9 +116,9 @@ void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 
 	{
 		for (unsigned int i = 0; i < num; i++)
 		{
-			color_array[i].r = randomf(0.0f, 1.0f);
-			color_array[i].g = randomf(0.0f, 1.0f);
-			color_array[i].b = randomf(0.0f, 1.0f);
+			color_array[i].r = 0.0f;
+			color_array[i].g = 0.0f;
+			color_array[i].b = 0.5f;
 			color_array[i].a = 1.0f;
 		}
 	}
@@ -164,9 +127,7 @@ void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 
 	// bind the SSBOs to the labeled "binding" in the compute shader using assigned layout labels
 	// this is similar to mapping data to attribute variables in the vertex shader
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, pos_ssbo);    // 4 - lay out id for positions in compute shader 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, dir_ssbo);	// 5 - lay out id for directions in compute shader 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, color_ssbo);	// 6 - lay out id for colors in compute shader 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, speed_ssbo);	// 7 - lay out id for speeds in compute shader 
 
 	// ************** Define VAO (for rendering) **************
 	// for particle rendering, the vertex and fragment shaders just need the verts and colors (computed by the compute shader).  

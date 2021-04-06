@@ -30,14 +30,10 @@ public:
 
 	// the ssbo ids of those particle's pos, dir, speed on GPU
 	GLuint pos_ssbo;
-	GLuint dir_ssbo;
-	GLuint speed_ssbo;
 	GLuint color_ssbo;
 	
 private:
 	vec4* pos_array;	// positions (x, y, z, w) of particles, w = 1, which is mapped to pos_ssbo
-	vec4* dir_array;	// moving directions (x, y, z, w) of particles, w = 0, which his mapped to dir_ssbo 
-	float* speed_array;	// the moving speed of particles, which is mapped to speed_ssbo 
 	vec4* color_array;	// colors (r, g, b, a) of particles, a = 1, which is mapped to color_ssbo
 	
 	// note that the vert and frag shaders cannot be combined with a compute shader in the same shader programs.
