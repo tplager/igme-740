@@ -116,6 +116,7 @@ void display()
 
 	glMatrixMode(GL_MODELVIEW);
 	glUseProgram(0);
+	glEnable(GL_DEPTH_TEST);
 	glColor3f(1.0f, 0, 0);
 	glPushMatrix();
 	glTranslatef(g_rayOrigin.x, g_rayOrigin.y, g_rayOrigin.z);
