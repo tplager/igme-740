@@ -1,0 +1,33 @@
+#version 430 compatibility
+
+uniform vec3 rayOriginPos; 
+uniform vec3 spherePos; 
+uniform float sphereRadius; 
+
+layout (std430, binding = 4) buffer Pos
+{
+	vec4 Positions [ ];
+};
+
+layout (std430, binding = 6) buffer Col 
+{
+	vec4 Colors [ ];
+};
+
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+
+void main()
+{
+	uint g_id = gl_GlobalInvocationID.x;
+
+	vec3 rayDirection = normalize(Positions[g_id].xyz - rayOriginPos);
+	
+	float result = pow(dot(rayDirection, (rayOriginPos - spherePos)), 2) - (pow(length(rayOriginPos - spherePos), 2) - pow(sphereRadius, 2));
+
+	if (result >= 0)
+		Colors[g_id].rgb = vec3(0.0f, 0.8f, 0.9f);
+	else
+		Colors[g_id].rgb = vec3(0.0f, 0.0f, 0.5f);
+}
+
