@@ -64,18 +64,6 @@
     <None Include="shaders\f_shader.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\perFrag_phong.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\perFrag_phong.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\perVert_phong.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\perVert_phong.vert">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\v_shader.vert">
       <Filter>Resource Files</Filter>
     </None>

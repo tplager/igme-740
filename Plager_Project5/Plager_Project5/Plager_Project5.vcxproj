@@ -161,10 +161,6 @@
   <ItemGroup>
     <None Include="shaders\c_shader.comp" />
     <None Include="shaders\f_shader.frag" />
-    <None Include="shaders\perFrag_phong.frag" />
-    <None Include="shaders\perFrag_phong.vert" />
-    <None Include="shaders\perVert_phong.frag" />
-    <None Include="shaders\perVert_phong.vert" />
     <None Include="shaders\v_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

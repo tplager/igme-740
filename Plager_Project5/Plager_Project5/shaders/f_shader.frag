@@ -1,8 +1,8 @@
-#version 430
-in vec4 colour;
-out vec4 frag_colour;
-
-void main() {
-  frag_colour = colour;
-  frag_colour = colour;
+#version 430             
+in vec2 st;              
+uniform sampler2D img;   
+out vec4 fc; 
+                      
+void main () {
+  fc = texture (img, st);
 }

@@ -33,5 +33,5 @@ public:
     Sphere(vec3 pos, float radius, vec3 color, float ambient, float diffuse, float phong);
     ~Sphere(){};
     
-    void Draw(); 
+    void draw(); 
 };

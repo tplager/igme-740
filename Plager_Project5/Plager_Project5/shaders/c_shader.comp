@@ -1,9 +1,5 @@
 #version 430 compatibility
 
-uniform vec3 rayOriginPos; 
-uniform vec3 spherePos; 
-uniform float sphereRadius; 
-
 layout (std430, binding = 4) buffer Pos
 {
 	vec4 Positions [ ];
@@ -14,20 +10,39 @@ layout (std430, binding = 6) buffer Col
 	vec4 Colors [ ];
 };
 
-layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 1, local_size_y = 1) in;
+
+void main() {
+  // base pixel colour for image
+  vec4 pixel = vec4(1.0, 0.0, 0.0, 1.0);
+  // get index in global work group i.e x,y position
+  uint g_id = gl_GlobalInvocationID.x;
+  
+  float max_x = 5.0;
+  float max_y = 5.0;
+  ivec2 dims = ivec2(640, 480); // fetch image dimensions
+  float x = (float(Positions[g_id].x * 2 - dims.x) / dims.x);
+  float y = (float(Positions[g_id].y * 2 - dims.y) / dims.y);
+  vec3 ray_o = vec3(x * max_x, y * max_y, 0.0);
+  vec3 ray_d = vec3(0.0, 0.0, -1.0); // ortho
+
+  vec3 sphere_c = vec3(0.0, 0.0, -10.0);
+  float sphere_r = 1.0;
+  
+  vec3 omc = ray_o - sphere_c;
+  float b = dot(ray_d, omc);
+  float c = dot(omc, omc) - sphere_r * sphere_r;
+  float bsqmc = b * b - c;
+  float t = 10000.0;
+  // hit one or both sides
+  if (bsqmc >= 0.0) {
+    pixel = vec4(0.4, 0.4, 1.0, 1.0);
+  }
+  else {
+	// Set Pixel equal to phong shading model
+  }
 
 
-void main()
-{
-	uint g_id = gl_GlobalInvocationID.x;
-
-	vec3 rayDirection = normalize(Positions[g_id].xyz - rayOriginPos);
-	
-	float result = pow(dot(rayDirection, (rayOriginPos - spherePos)), 2) - (pow(length(rayOriginPos - spherePos), 2) - pow(sphereRadius, 2));
-
-	if (result >= 0)
-		Colors[g_id].rgb = vec3(0.0f, 0.8f, 0.9f);
-	else
-		Colors[g_id].rgb = vec3(0.0f, 0.0f, 0.5f);
+  // output to a specific pixel in the image
+  Colors[g_id].rgb = pixel.rgb;
 }
-

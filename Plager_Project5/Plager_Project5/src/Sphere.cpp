@@ -22,18 +22,19 @@ Sphere::Sphere(vec3 p, float r, vec3 c, float a, float d, float ph)
     phong = ph; 
 }
 
-void Sphere::Draw()
+void Sphere::draw()
 {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_LIGHTING);
-
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     glTranslatef(pos.x, pos.y, pos.z);
     glColor3f(color.x, color.y, color.z);
-    glutWireSphere(radius, 10, 10);
+    glutSolidSphere(radius, 10, 10);
 
     glPopMatrix();
 };
