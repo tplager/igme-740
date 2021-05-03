@@ -144,15 +144,13 @@
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\RecPrism.cpp" />
     <ClCompile Include="src\ShaderClass.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
-    <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Box.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Light.h" />
-    <ClInclude Include="src\RecPrism.h" />
     <ClInclude Include="src\ShaderClass.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\Sphere.h" />
@@ -160,8 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\c_shader.comp" />
-    <None Include="shaders\f_shader.frag" />
-    <None Include="shaders\v_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

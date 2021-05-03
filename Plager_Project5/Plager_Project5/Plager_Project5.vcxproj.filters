@@ -27,12 +27,6 @@
     <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\RecPrism.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Sphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -53,18 +47,12 @@
     <ClInclude Include="src\ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\RecPrism.h">
+    <ClInclude Include="src\Box.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\c_shader.comp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\f_shader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\v_shader.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -16,10 +16,11 @@ public:
 	mat4			mvMat;
     mat4			projMat;
 
+	float           fovy;              // view angle 
+	float           near_plane;
+
 private:
-    float           fovy;              // view angle 
     float           aspect;            // the window ration equal to w/h
-    float           near_plane;
     float           far_plane;
 
     vec4			axis_n;            //eye-lookat
@@ -57,6 +58,7 @@ private:
 public: 
 	Camera();
 	~Camera();
+
 	void PrintProperty();
 	void set(float eye_x, float eye_y, float eye_z, 
 			 float lookat_x, float lookat_y, float lookat_z, 

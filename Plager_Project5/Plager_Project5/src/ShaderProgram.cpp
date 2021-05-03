@@ -68,7 +68,7 @@ void ShaderProgram::setInt(const char* name, int value)
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		cout << "Uniform integer: " << name <<"doesn't exist."<< endl;
+		cout << "Uniform integer: " << name <<" doesn't exist."<< endl;
 	}
 	else {
 		glUniform1i(loc, value);
