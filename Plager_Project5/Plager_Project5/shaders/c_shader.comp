@@ -1,15 +1,19 @@
 #version 430 compatibility
 
-#define EPSILON 0.00001
-#define INFINITY_FLT 1000000.0
+#define EPS 0.00001
+#define BIG_FLT 1000000.0
 
-struct Light {
+layout(rgba32f, binding = 0) uniform image2D framebuffer;
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+uniform struct Light {
 	vec3 pos; 
 	vec3 color; 
 	float intensity; 
-};
+} sceneLight;
 
-struct Box {
+uniform struct Box {
 	vec3 min;
 	vec3 max;
 	mat4 rot; 
@@ -20,9 +24,9 @@ struct Box {
 	float ambient; 
 	float diffuse; 
 	float phong; 
-};
+} boxes[2];
 
-struct Sphere {
+uniform struct Sphere {
 	vec3 pos; 
 	float rad;
 
@@ -31,18 +35,15 @@ struct Sphere {
 	float ambient; 
 	float diffuse; 
 	float phong; 
-};
+} spheres[2];
 
 struct Ray {
 	vec3 origin; 
 	vec3 direction; 
-	vec3 at(float t) {
-		return origin + direction * t;
-	}
 };
 
 struct RayHit {
-	float tNear; 
+	float nearIntersectionDistance; 
 	Sphere sphere; 
 	Box box; 
 	bool isSphere; 
@@ -50,44 +51,46 @@ struct RayHit {
 
 uniform vec3 eye;
 uniform float nearPlane; 
-uniform float camAngle; 
-
-uniform int viewportWidth; 
-uniform int viewportHeight;
-
-uniform Light sceneLight; 
-
-uniform Sphere spheres[2]; 
-
-uniform Box boxes[2]; 
-
-layout(rgba32f, binding = 0) uniform image2D framebuffer;
-
-layout(local_size_x = 1, local_size_y = 1) in;
+uniform float camAngle;
 
 // Reference: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
-bool solveQuadratic(const float a, const float b, const float c, float x0, float x1) 
+bool solveQuadratic(float a, float b, float c, out float x0, out float x1) 
 { 
     float discr = b * b - 4 * a * c; 
     if (discr < 0) return false; 
     else if (discr == 0) x0 = x1 = - 0.5 * b / a; 
     else { 
-        float q = (b > 0) ? 
-            -0.5 * (b + sqrt(discr)) : 
-            -0.5 * (b - sqrt(discr)); 
-        x0 = q / a; 
-        x1 = c / q; 
+		x0 = (-b + sqrt(discr)) / (2.0 * a);
+		x1 = (-b - sqrt(discr)) / (2.0 * a);
     } 
     if (x0 > x1) {
 		float tempBuffer = x0; 
 		x0 = x1; 
-		x1 = x0; 
+		x1 = tempBuffer; 
 	}
  
     return true; 
 } 
 
-bool raySphereIntersection(Ray ray, Sphere sphere, out float tNear) {
+// Determining the normal vector of a box's surface at a given hit point
+vec3 findBoxNormal(vec3 hitPoint, Box box)
+{
+	// Convert to AABB space
+	hitPoint = vec3(box.invRot * vec4(hitPoint, 1.0));
+
+	vec3 c = (box.min + box.max) * 0.5;
+	vec3 p = hitPoint - c;
+	vec3 d = (box.min - box.max) * 0.5;
+	float bias = 1 + EPS;
+
+	vec3 normal;
+	normal = vec3(int(p.x / abs(d.x) * bias), int(p.y / abs(d.y) * bias), int(p.z / abs(d.z) * bias));
+	normal = normalize(vec3(box.rot * vec4(normal, 0.0)));
+	return normal;
+}
+
+// Ray Sphere Intersection
+bool raySphereIntersection(Ray ray, Sphere sphere, out float intersectionDistance) {
 	float t0, t1; // solutions for t if the ray intersects 
 
 	vec3 oc = ray.origin - sphere.pos;
@@ -104,126 +107,285 @@ bool raySphereIntersection(Ray ray, Sphere sphere, out float tNear) {
 			return false; // both t0 and t1 are negative 
     } 
 
-	tNear = t0; 
+	intersectionDistance = t0; 
 
 	return true; 
 }
 
-bool rayBoxIntersection(Ray ray, Box box) {
-    float tmin = (box.min.x - ray.origin.x) / ray.direction.x; 
-    float tmax = (box.max.x - ray.origin.x) / ray.direction.x; 
+// Ray Box Intersection
+// Reference: http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
+bool rayBoxIntersection(Ray ray, Box box, out float intersectionDistance) {
+	float tMin = 0.0;
+	float tMax = 100000.0;
  
-    if (tmin > tmax) {
-		float tempBuffer = tmin; 
-		tmin = tmax; 
-		tmax = tempBuffer; 
+	vec3 worldPosition = box.rot[3].xyz; 
+	vec3 delta = worldPosition - ray.origin; 
+
+	vec3 xaxis = box.rot[0].xyz;
+	float e = dot(xaxis, delta);
+	float f = dot(ray.direction, xaxis);
+
+	if (abs(f) > EPS){ // Standard case
+
+		float t1 = (e+box.min.x)/f; // Intersection with the "left" plane
+		float t2 = (e+box.max.x)/f; // Intersection with the "right" plane
+		// t1 and t2 now contain distances betwen ray origin and ray-plane intersections
+
+		// We want t1 to represent the nearest intersection, 
+		// so if it's not the case, invert t1 and t2
+		if (t1>t2){
+			float w=t1;t1=t2;t2=w; // swap t1 and t2
+		}
+
+		// tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
+		if ( t2 < tMax )
+			tMax = t2;
+		// tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
+		if ( t1 > tMin )
+			tMin = t1;
+
+		// And here's the trick :
+		// If "far" is closer than "near", then there is NO intersection.
+		// See the images in the tutorials for the visual explanation.
+		if (tMax < tMin )
+			return false;
+
 	}
- 
-    float tymin = (box.min.y - ray.origin.y) / ray.direction.y; 
-    float tymax = (box.max.y - ray.origin.y) / ray.direction.y; 
- 
-    if (tymin > tymax) {
-		float tempBuffer = tymin; 
-		tymin = tymax; 
-		tymax = tempBuffer;
+	else
+	{ // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
+		if(-e+box.min.x > 0.0f || -e+box.max.x < 0.0f)
+			return false;
 	}
- 
-    if ((tmin > tymax) || (tymin > tmax)) 
-        return false; 
- 
-    if (tymin > tmin) 
-        tmin = tymin; 
- 
-    if (tymax < tmax) 
-        tmax = tymax; 
- 
-    float tzmin = (box.min.z - ray.origin.z) / ray.direction.z; 
-    float tzmax = (box.max.z - ray.origin.z) / ray.direction.z; 
- 
-    if (tzmin > tzmax) {
-		float tempBuffer = tzmin; 
-		tzmin = tzmax; 
-		tzmax = tempBuffer;	}
- 
-    if ((tmin > tzmax) || (tzmin > tmax)) 
-        return false; 
- 
-    if (tzmin > tmin) 
-        tmin = tzmin; 
- 
-    if (tzmax < tmax) 
-        tmax = tzmax; 
- 
-    return true; 	
+
+	// Test intersection with the 2 planes perpendicular to the OBB's Y axis
+	// Exactly the same thing than above.
+	{
+		vec3 yaxis = box.rot[1].xyz;
+		float e = dot(yaxis, delta);
+		float f = dot(ray.direction, yaxis);
+
+		if (abs(f) > EPS){
+
+			float t1 = (e+box.min.y)/f;
+			float t2 = (e+box.max.y)/f;
+
+			if (t1>t2){float w=t1;t1=t2;t2=w;}
+
+			if ( t2 < tMax )
+				tMax = t2;
+			if ( t1 > tMin )
+				tMin = t1;
+			if (tMin > tMax)
+				return false;
+
+		}else{
+			if(-e+box.min.y > 0.0f || -e+box.max.y < 0.0f)
+				return false;
+		}
+	}
+
+	
+
+	// Test intersection with the 2 planes perpendicular to the OBB's Z axis
+	// Exactly the same thing than above.
+	{
+		vec3 zaxis = box.rot[2].xyz;
+		float e = dot(zaxis, delta);
+		float f = dot(ray.direction, zaxis);
+
+		if (abs(f) > EPS){
+
+			float t1 = (e+box.min.z)/f;
+			float t2 = (e+box.max.z)/f;
+
+			if (t1>t2){float w=t1;t1=t2;t2=w;}
+
+			if ( t2 < tMax )
+				tMax = t2;
+			if ( t1 > tMin )
+				tMin = t1;
+			if (tMin > tMax)
+				return false;
+
+		}else{
+			if(-e+box.min.z > 0.0f || -e+box.max.z < 0.0f)
+				return false;
+		}
+	}
+
+	intersectionDistance = tMin;
+	return true;
 }
 
+// Traces a ray through the objects to determine the closest intersection
 bool trace(Ray ray, out RayHit hit) {
 	
+	// Currently not intersecting : base
 	bool intersects = false; 
 
-	float tNear = INFINITY_FLT;
+	// Set intersection distance variable to a large number 
+	float intersectionDistance = BIG_FLT;
 
 	// Sphere Intersection
 	for (int i = 0; i < 2; i++) {
-		float tNearK = INFINITY_FLT - EPSILON; 
-		if (raySphereIntersection(ray, spheres[i], tNearK) && tNearK < tNear) {
+		
+		// Create a temporary intersection distance variable to compare against
+		float intersectionDistanceTemp = BIG_FLT - EPS; 
+
+		// If the ray is intersecting with this sphere
+		// Update the intersection distance buffer variable to the distance 
+		// If this buffer distance is less than the current intersection distance
+		// On first intersection it always will be
+		// Set the hit's properties to the necessary values
+		if (raySphereIntersection(ray, spheres[i], intersectionDistanceTemp) && intersectionDistanceTemp < intersectionDistance) {
+			
+			// Hit a sphere
 			hit.isSphere = true; 
+
+			// Set the sphere to the current sphere
 			hit.sphere = spheres[i]; 
-			hit.tNear = tNearK; 
+
+			// Update intersection distance
+			intersectionDistance = intersectionDistanceTemp; 
+
+			// Set Hit's intersection distance to the current intersection distance
+			hit.nearIntersectionDistance = intersectionDistance; 
+
+			// Set intersects equal to true
 			intersects = true; 
 		}
 	}
 
 	// Box Intersection
-//	for (int i = 0; i < 2; i++) {
-//	
-//	}
+	for (int i = 0; i < 2; i++) {
+		// Create a temporary intersection distance variable to compare against
+		float intersectionDistanceTemp = BIG_FLT - EPS; 
+
+		// If the ray is intersecting with a box in the scene
+		// Update the intersection distance buffer variable to the distance sent from the function
+		// If this buffer distance is less than the current intersection distance
+		// It could have been updated by the spheres or could still be infinity if no sphere intersections
+		// Set the hit's properties to the necessary values
+		if (rayBoxIntersection(ray, boxes[i], intersectionDistanceTemp) && intersectionDistanceTemp < intersectionDistance) {
+			
+			// Did not hit a sphere
+			// Used to determine which values should be retrieved later
+			hit.isSphere = false;
+
+			// Set the hit's box to the current value
+			hit.box = boxes[i]; 
+
+			// Update intersection distance
+			intersectionDistance = intersectionDistanceTemp; 
+
+			// Set Hit's intersection distance to the current intersection distance
+			hit.nearIntersectionDistance = intersectionDistance; 
+			
+			// Set intersects equal to true
+			intersects = true; 
+		}
+	}
 
 	return intersects; 
 }
 
+// Cast the passed in ray from the camera through the current pixel 
+// through the scene and return the color the pixel should be
 vec4 rayCast(Ray ray) {
 	// base pixel colour for image
 	vec4 pixel = vec4(0.0, 0.0, 0.0, 1.0);
 
+	// Creating a new hit object to hold hit information
 	RayHit hit; 
+
+	// If a trace returns that there is an intersection
+	// It should also update any important information 
+	// related to the hit in the hit variable
 	if (trace(ray, hit)) {
-		vec3 hitPoint = ray.origin + ray.direction * hit.tNear; 
+
+		// Set the hit point equal to the eye position plus the 
+		// ray direction scaled by the nearest intersection returned by the hit
+		vec3 hitPoint = ray.origin + ray.direction * hit.nearIntersectionDistance; 
+
+		// Define a normal vector to the hit surface
 		vec3 normal; 
 		
+		// Define color and light variables for use in future calculations
+		float hitAmbient; 
+		float hitDiffuse; 
+		float hitPhong; 
+		vec3 hitColor; 
+
+		// If the ray hit a sphere
 		if (hit.isSphere) {
+
+			// Set normal equal to the normalized vector 
+			// from the center of the sphere to the hit point
 			normal = normalize(hitPoint - hit.sphere.pos);
-			
-			pixel.rgb = hit.sphere.color; 
-		}
 
+			// Set light and color variables equal to the variables of the hit object
+			hitAmbient = hit.sphere.ambient;
+			hitDiffuse = hit.sphere.diffuse;
+			hitPhong = hit.sphere.phong; 
+			hitColor = hit.sphere.color;
+		}
+		// Otherwise if there was a hit, we know it was a box
 		else {
-			pixel.rgb = hit.box.color; 
+			// Set the normal equal to the normal from the box's hit surface
+			normal = findBoxNormal(hitPoint, hit.box);
+
+			// Set light and color variables equal to the variables of the hit object
+			hitAmbient = hit.box.ambient;
+			hitDiffuse = hit.box.diffuse;
+			hitPhong = hit.box.phong; 
+			hitColor = hit.box.color;
 		}
 
+		// Find the ray from the light's position to the point that was hit
 		vec3 lightRay = hitPoint - sceneLight.pos; 
-		float lightRayDotLight = dot(lightRay, lightRay); 
-		lightRay = normalize(lightRay); 
 		
+		// Set the shadow's origin to the correct value 
+		// slightly larger or smaller than the hit point 
+		// depending on the direction of the original ray
+		// to prevent self hits
 		vec3 shadowOrigin; 
 		if (dot(ray.direction, normal) < 0) {
-			shadowOrigin = hitPoint + normal * EPSILON; 
+			shadowOrigin = hitPoint + normal * EPS; 
 		}
 		else {
-			shadowOrigin = hitPoint - normal * EPSILON; 
+			shadowOrigin = hitPoint - normal * EPS; 
 		}
 
-		Ray shadow = Ray(shadowOrigin, -lightRay); 
+		// Create a new ray from the shadow's origin towards the light
+		Ray shadow = Ray(shadowOrigin, -normalize(lightRay)); 
 		RayHit shadowHit; 
 		
-		if (trace(shadow, shadowHit) && shadowHit.tNear * shadowHit.tNear < lightRayDotLight) {
-			return vec4(0,0,0,1); 
+		// If this shadow ray hits anything 
+		// The color should be shadow color rather than phong shading
+		if (trace(shadow, shadowHit)) {
+			
+			// Creating a closer approximation to shadow by darkening the object's color rather than just setting to black
+			vec3 shadowColor = hitColor - (0.8, 0.8, 0.8); 
+
+			if (shadowColor.r < 0) 
+				shadowColor.r = 0.0; 
+			if (shadowColor.g < 0)
+				shadowColor.g = 0.0; 
+			if (shadowColor.b < 0)
+				shadowColor.b = 0.0; 
+
+			return vec4(shadowColor.xyz, 1.0);
+
+			// Not returning straight black anymore
+			//return vec4(0, 0, 0, 1.0); 
 		}
 
-//		float ambient = hit.sphere.ambient; 
-//		float diffuse = sceneLight.intensity * hit.sphere.diffuse * dot(normal, -lightRay); 
-//		float spec = sceneLight.intensity * hit.sphere.phong * pow(max(0.0, dot(reflect(lightRay, normal), -ray.direction)), 50); 
-//		pixel.rgb = (ambient + diffuse) * sceneLight.color * hit.sphere.color + spec * sceneLight.color;
+		// Phong shading implementation from instructions
+		float ambient = hitAmbient; 
+		float diffuse = sceneLight.intensity * hitDiffuse * max(0.0, dot(shadow.direction, normal)); 
+		vec3 r = normalize(reflect(-shadow.direction, normal)); 
+		float spec = sceneLight.intensity * hitPhong * pow(max(0.0, dot(r, -ray.direction)), 50); 
+		pixel.rgb = (ambient + diffuse) * sceneLight.color * hitColor + spec * sceneLight.color;
 	}
 
 	return pixel;
@@ -231,19 +393,20 @@ vec4 rayCast(Ray ray) {
 
 void main() {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 pos = ivec2(pixelCoords.x, viewportHeight - pixelCoords.y); 
+	ivec2 dimensions = imageSize(framebuffer);
+	ivec2 pos = ivec2(pixelCoords.x, dimensions.y - pixelCoords.y); 
 
 	// Normalizing using frame's dimensions
 	vec2 ndCoord = pos + (0.5, 0.5);
-	ndCoord.x /= float(viewportWidth); 
-	ndCoord.y /= float(viewportHeight); 
+	ndCoord.x /= float(dimensions.x); 
+	ndCoord.y /= float(dimensions.y); 
 
 	// Centering around origin
 	vec2 pixScreen; 
 	pixScreen.x = 2 * ndCoord.x - 1; 
 	pixScreen.y = 1 - 2 * ndCoord.y; 
 
-	float aspectRatio = viewportHeight/viewportHeight; 
+	float aspectRatio = float(dimensions.x) / float(dimensions.y);
 
 	// Converting to Camera-space
 	vec2 pixCamera; 
@@ -254,10 +417,6 @@ void main() {
 	vec3 rayDirection = normalize(vec3(pixCamera.x, pixCamera.y, -nearPlane)); 
 
 	vec4 color = rayCast(Ray(eye, rayDirection)); 
-
-//	if (pixelCoords.y < viewportHeight/2) {
-//		color.rgb = vec3(0.0, 0.0, 1.0);
-//	}
 
 	imageStore(framebuffer, pixelCoords, color);
 }

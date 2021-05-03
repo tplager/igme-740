@@ -252,14 +252,10 @@ void setShaderUniforms() {
 	cShaderProg.setFloat("camAngle", g_cam.fovy * MATH_PI / 180.0f);
     cShaderProg.setFloat("nearPlane", g_cam.near_plane);
 
-	// Viewport
-    cShaderProg.setInt("viewportWidth", g_winWidth); 
-    cShaderProg.setInt("viewportHeight", g_winHeight);
-
 	// Light
     cShaderProg.setFloat3V("sceneLight.pos", 1, glm::value_ptr(g_light.pos));
     cShaderProg.setFloat3V("sceneLight.color", 1, glm::value_ptr(g_light.color));
-    cShaderProg.setFloat1V("sceneLight.intensity", 1, &g_light.intensity);
+    cShaderProg.setFloat("sceneLight.intensity", g_light.intensity);
 
 	// Spheres
     for (int i = 0; i < g_sphere_num; i++) {
